@@ -1,0 +1,22 @@
+{
+    "name": "adiacent/autologin",
+    "description":"This module allows you to enter automatically using the token returned by the login call via API",
+    "require": {
+        "php": "^7.0|^7.1",
+
+        "magento/magento-composer-installer": "*"
+    },
+    "suggest": {
+
+    },
+    "type": "magento2-module",
+    "license": "OSL 3.0",
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Adiacent\\Autologin\\": ""
+        }
+    }
+}
