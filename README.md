@@ -11,7 +11,7 @@ Follow this guide: https://getcomposer.org/doc/05-repositories.md#vcs
 ```json
   "adiacent": {
       "type": "vcs",
-      "url": "https://srvgitlab.apra.it/adiacent/magento2-autologin"
+      "url": "https://github.com/adiacent-com/m2-autologin"
   }
 ```
 
