@@ -27,18 +27,50 @@ use Magento\Framework\App\Action\Context;
 use Magento\Integration\Model\Oauth\Token;
 use Magento\Authorization\Model\UserContextInterface;
 use Magento\Integration\Model\Oauth\TokenFactory;
+use Magento\Framework\Stdlib\CookieManagerInterface;
+use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
+use Magento\Framework\Session\SessionManagerInterface;
 
 class Index extends Action
 {
+    const COOKIE_NO_PRIVACY = 'privacy_mobile';
+    /**
+     * @var CollectionFactory
+     */
     protected $customerCollection;
+    /**
+     * @var Session
+     */
     protected $customerSession;
+    /**
+     * @var TokenFactory
+     */
     protected $tokenFactory;
+    /**
+     * CookieManager
+     *
+     * @var CookieManagerInterface
+     */
+    private $cookieManager;
+
+    /**
+     * @var CookieMetadataFactory
+     */
+    private $cookieMetadataFactory;
+
+    /**
+     * @var SessionManagerInterface
+     */
+    private $sessionManager;
 
     public function __construct(
         Context $context,
         CollectionFactory $customerCollection,
         Session $customerSession,        
-        TokenFactory $tokenFactory
+        TokenFactory $tokenFactory,
+        CookieManagerInterface $cookieManager,
+        CookieMetadataFactory $cookieMetadataFactory,
+        SessionManagerInterface $sessionManager
     )
     {
         parent::__construct($context);
@@ -46,6 +78,9 @@ class Index extends Action
         $this->customerCollection = $customerCollection;
         $this->customerSession = $customerSession;
         $this->tokenFactory = $tokenFactory;
+        $this->cookieManager = $cookieManager;
+        $this->cookieMetadataFactory = $cookieMetadataFactory;
+        $this->sessionManager = $sessionManager;
     }
 
     public function execute()
@@ -62,11 +97,23 @@ class Index extends Action
             $this->customerSession->setCustomerAsLoggedIn($customer);
           }
         }
+        $metadata = $this->cookieMetadataFactory
+          ->createPublicCookieMetadata()
+          ->setDuration(86400) //Un giorno
+          ->setPath($this->sessionManager->getCookiePath())
+          ->setDomain($this->sessionManager->getCookieDomain());
+
+        $this->cookieManager->setPublicCookie(
+          self::COOKIE_NO_PRIVACY,
+          '1',
+          $metadata
+        );
         $this->_redirect($this->_redirect->getRefererUrl());
         return;
     }
 
-    private function getToken($tokenString): Token {
+    private function getToken($tokenString)
+    {
       $token = $this->tokenFactory->create()->loadByToken($tokenString);
       if ($token->getId() && !$token->getRevoked()) {
         $userType = $token->getUserType();
